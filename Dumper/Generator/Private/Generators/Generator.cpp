@@ -22,7 +22,6 @@ inline void InitSettings()
 	Settings::InitArrayDimSizeSettings();
 }
 
-
 void Generator::InitEngineCore()
 {
 	/* manual override */
@@ -51,7 +50,17 @@ void Generator::InitEngineCore()
 
 	CALL_PLATFORM_SPECIFIC_FUNCTION(Off::InSDK::ProcessEvent::InitPE); // Must be at this position, relies on offsets initialized in Off::Init()
 
-	Off::InSDK::World::InitGWorld(); // Must be at this position, relies on offsets initialized in Off::Init()
+	/* --- MANUAL GWORLD OVERRIDE --- */
+	// 1. Get the base memory address of the game executable
+	uintptr_t ImageBase = reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr));
+
+	// 2. Define your manually found GWorld offset (Change 0x12345678 to your actual offset)
+	uintptr_t GWorldOffset = 0x12345678; 
+	uintptr_t GWorldAddress = ImageBase + GWorldOffset; 
+
+	// 3. Pass the absolute pointer directly to Dumper-7's custom overload
+	Off::InSDK::World::InitGWorld(reinterpret_cast<void*>(GWorldAddress));
+	/* ------------------------------ */
 
 	Off::InSDK::Text::InitTextOffsets(); // Must be at this position, relies on offsets initialized in Off::InitPE()
 
